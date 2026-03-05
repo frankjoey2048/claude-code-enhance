@@ -401,7 +401,7 @@
           const tex = annotation.textContent;
           // 清理换行和多余空格, 保持单行 (Obsidian 兼容)
           const cleaned = tex.replace(/\s+/g, ' ').trim();
-          const isDisplay = node.classList.contains('katex-display');
+          const isDisplay = node.closest('.katex-display') !== null;
           return isDisplay ? `$$${cleaned}$$` : `$${cleaned}$`;
         }
       }
@@ -442,21 +442,23 @@
 
         case 'A': {
           const href = node.getAttribute('href') || '';
-          const text = node.textContent;
-          return `[${text}](${href})`;
+          return `[${childrenContent}](${href})`;
         }
 
         case 'UL': {
           const items = children
             .filter(c => c.tagName === 'LI')
             .map(li => {
-              const text = li.textContent.trim();
               const nested = li.querySelector('ul, ol');
               if (nested) {
-                const nestedMd = traverse(nested, {});
-                return `- ${text.replace(nested.textContent.trim(), '').trim()}\n  ${nestedMd}`;
+                const liContent = Array.from(li.childNodes)
+                  .filter(c => c !== nested)
+                  .map(c => traverse(c, newContext))
+                  .join('').trim();
+                const nestedMd = traverse(nested, newContext);
+                return `- ${liContent}\n  ${nestedMd}`;
               }
-              return `- ${text}`;
+              return `- ${traverse(li, newContext).trim()}`;
             })
             .join('\n');
           return '\n' + items + '\n';
@@ -467,8 +469,7 @@
           const items = children
             .filter(c => c.tagName === 'LI')
             .map(li => {
-              const text = li.textContent.trim();
-              return `${idx++}. ${text}`;
+              return `${idx++}. ${traverse(li, newContext).trim()}`;
             })
             .join('\n');
           return '\n' + items + '\n';
@@ -484,7 +485,7 @@
           rows.forEach((row, rowIdx) => {
             const cells = row.querySelectorAll('th, td');
             const cellTexts = Array.from(cells).map(c =>
-              c.textContent.trim().replace(/\|/g, '\\|')
+              traverse(c, newContext).trim().replace(/\|/g, '\\|')
             );
             result += `| ${cellTexts.join(' | ')} |\n`;
             if (rowIdx === 0) {
@@ -495,7 +496,8 @@
         }
 
         case 'BLOCKQUOTE': {
-          const quoteLines = node.textContent.trim().split('\n');
+          const quoteContent = childrenContent.trim();
+          const quoteLines = quoteContent.split('\n');
           return '\n' + quoteLines.map(l => `> ${l}`).join('\n') + '\n';
         }
 

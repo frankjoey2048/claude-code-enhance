@@ -86,6 +86,19 @@ node patch_extension.js
 
 渲染采用段落级处理: 先用 `textContent` 重组被 markdown 渲染器打散的公式 (如 `_` 被解析为斜体), 再统一渲染.
 
+## 更新增强脚本
+
+修改 `webview/enhance.js` 后, 需要重新运行补丁脚本将文件复制到扩展目录:
+
+```bash
+node patch_extension.js
+```
+
+然后重载编辑器窗口: `Cmd+Shift+P` → `Developer: Reload Window`
+
+> **注意**: 补丁脚本会检测已有补丁并跳过重复操作, 但每次都会重新复制 `enhance.js`.
+> 如果输出 "No changes made", 说明 `extension.js` 无需修改, 但 `enhance.js` 已更新到位.
+
 ## 扩展更新后
 
 Claude Code 扩展更新会覆盖补丁, 重新运行即可:
