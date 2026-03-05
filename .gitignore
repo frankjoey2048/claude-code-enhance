@@ -1,0 +1,23 @@
+# 备份文件
+*.bak
+*.bak2
+*.bak3
+
+# 扩展自带文件 (不需要上传)
+extension.js
+extension.js.bak*
+index.js
+index.css
+index.css.bak
+codicon-*.ttf
+package.json
+.vsixmanifest
+claude-code-settings.schema.json
+
+# 扩展资源
+resources/
+image/
+
+# 系统文件
+.DS_Store
+Thumbs.db
